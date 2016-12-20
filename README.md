@@ -1,9 +1,9 @@
 Eve-Embedded
 ===========
 
-[![Build Status](https://travis-ci.org/ateliedocodigo/python-module-boilerplate.svg?branch=master)](https://travis-ci.org/ateliedocodigo/python-module-boilerplate)
-[![Requirements Status](https://requires.io/github/ateliedocodigo/python-module-boilerplate/requirements.svg?branch=master)](https://requires.io/github/ateliedocodigo/python-module-boilerplate/requirements/?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/ateliedocodigo/python-module-boilerplate/badge.svg?branch=master)](https://coveralls.io/github/ateliedocodigo/python-module-boilerplate?branch=master)
+[![Build Status](https://travis-ci.org/luiscoms/eve-embedded.svg?branch=master)](https://travis-ci.org/luiscoms/eve-embedded)
+[![Requirements Status](https://requires.io/github/luiscoms/eve-embedded/requirements.svg?branch=master)](https://requires.io/github/luiscoms/eve-embedded/requirements/?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/luiscoms/eve-embedded/badge.svg?branch=master)](https://coveralls.io/github/luiscoms/eve-embedded?branch=master)
 
 This project servers as an example of a Python package with some boilerplate
 code already in place.
@@ -37,7 +37,7 @@ schema = {
 Then install the module
 
 ```python
-from eve_emdedded import embedded
+from eve_embedded import embedded
 
 app = Eve()
 embedded.install(app)
