@@ -26,8 +26,6 @@ Monkey patch que altera o método build_response_document para incluir
 dados de outros serviços.
 
 """
-import flask
-from flask import abort
 
 from eve.methods import common
 from eve.utils import parse_request, config, debug_error_message
@@ -107,27 +105,29 @@ def new_field_definition(resource, chained_fields, document):
     subfields = chained_fields.split('.')
 
     for field in subfields:
-
-        # print("new_field_definition ", field)
         try:
             definition = definition['schema'][field]
-            # print("!!! definition ", definition)
-            # if definition.get('type') is 'objectid':
-            #     return definition
             if definition.get('type') in ('list', 'string')\
                and 'schema' in definition:
                 definition = definition['schema']
+            elif definition['type'] == 'vars_meta':
+                try:
+                    tmpl = importlib.import_module(
+                        'classifications_api.vars_meta_templates.{}'
+                        .format(document['vars_meta_template']))
+                    definition = {'schema': tmpl.schema}
+                except ImportError:
+                    pass
 
         except KeyError:
             return None
 
-    # print("oooooooooo definition ", definition)
     return definition
 
 
 def get_content(resource, content_id, additional_embedded={}):
-    # if not resource.startswith('http'):
-    #     resource = 'http://api.rbs.com.br/' + resource
+    if not resource.startswith('http'):
+        resource = 'http://api.rbs.com.br/' + resource
     parms = {}
     if additional_embedded:
         parms['embedded'] = json.dumps(dict((x, 1) for x in additional_embedded))
@@ -145,11 +145,6 @@ def get_content(resource, content_id, additional_embedded={}):
 
 
 def embedded_document(reference, data_relation, field_name, additional_embedded={}):
-
-    print("\nembedded_document", data_relation, reference)
-    if not data_relation['resource'].startswith('http'):
-        return common.embedded_document(reference, data_relation, field_name)
-
     return get_content(data_relation['resource'], reference, additional_embedded)
 
 
@@ -164,7 +159,6 @@ def resolve_additional_embedded_documents(document, resource, embedded_fields):
         abort(400, description='Unable to parse `embedded` clause')
     extra_embedded = extra_embedded.keys()
     for field in new_resolve_embedded_fields(resource, req, document):
-        # print("field ................................", field)
         field_extra_name = field + '.'
         field_extra_embedded = filter(lambda x: x.startswith(field_extra_name), extra_embedded)
         field_extra_embedded = map(lambda x: x.replace(field_extra_name, '', 1), field_extra_embedded)
@@ -195,7 +189,6 @@ def install(app):
         old_embedded_fields = list(old_embedded_fields)
         new_embedded_fields = filter(lambda x: not new_field_definition(resource, x, None).get('data_relation').get('resource'), embedded_fields)
         new_embedded_fields = list(new_embedded_fields)
-        # print(" list new_embedded_fields", new_embedded_fields)
         result = original_build_response_document(document, resource, old_embedded_fields, latest_doc)
         resolve_additional_embedded_documents(document, resource, new_embedded_fields)
         return result
