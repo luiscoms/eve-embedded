@@ -30,8 +30,8 @@ class Tox(TestCommand):
 setuptools.setup(
     name="Eve-Embedded",
     version=__version__,
-    description="Python boilerplate project",
-    url="https://github.com/westphahl/boilerplate",
+    description="Python project",
+    url="https://github.com/luiscoms/eve-embedded",
     author="Luis Fernando Gomes",
     author_email="luiscoms@ateliedocodigo.com.br",
     license="MIT",
@@ -45,13 +45,6 @@ setuptools.setup(
     ],
     keywords=["eve", "rest", "api"],
     packages=setuptools.find_packages(exclude=["tests", "tests.*"]),
-    # setup_requires=[
-    #     "requests",
-    # ],
-    # install_requires=[
-    #     "eve",
-    # ],
-    # tests_require=['tox'],
     cmdclass={
         'test': Tox,
     },
