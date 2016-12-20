@@ -55,7 +55,7 @@ DOMAIN = {
                             'type': 'objectid',
                             'data_relation': {
                                 'resource': 'people',
-                                # 'field': '_id',
+                                'field': '_id',
                                 "embeddable": True,
                             }
                         }
@@ -74,9 +74,8 @@ DOMAIN = {
                         'relation': {
                             'type': 'string',
                             'data_relation': {
-                                "resource": 'http://myapi.com/people',
-                                # 'field': '_id'
-                                # "embeddable": True,
+                                "api": 'http://myapi.com/people',
+                                "embeddable": True,
                             }
                         }
                     }

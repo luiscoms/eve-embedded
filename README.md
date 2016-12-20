@@ -47,6 +47,8 @@ embedded.install(app)
 Running tests with `tox`
 ----
 
+You will need an instance of `mongo` running locally
+
 Install `tox`
 ```
 $ pip install tox

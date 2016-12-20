@@ -8,17 +8,15 @@ No Settings:
 'authors': {
     'type': 'list',
     'maxlength': 15,
-    'schema': {"type": "string", "data_relation": {"api": "http://api.rbs.com.br/authors", "embeddable": True}}
+    'schema': {"type": "string", "data_relation": {"api": "http://api.com.br/authors", "embeddable": True}}
 },
 
 No application.py:
 
-from apis_common import embedded
+from eve_embedded import embedded
 
 application = Eve()
 embedded.install(application)
-
-Depende do módulo validator.py
 
 Funcionamento:
 
@@ -126,8 +124,6 @@ def new_field_definition(resource, chained_fields, document):
 
 
 def get_content(resource, content_id, additional_embedded={}):
-    if not resource.startswith('http'):
-        resource = 'http://api.rbs.com.br/' + resource
     parms = {}
     if additional_embedded:
         parms['embedded'] = json.dumps(dict((x, 1) for x in additional_embedded))
@@ -139,13 +135,15 @@ def get_content(resource, content_id, additional_embedded={}):
         if embedded_doc.get('_links'):
             del embedded_doc['_links']
     except:
-        logger.error("Erro ao carregar conteúdo: {}/{}".format(resource, content_id), exc_info=True)
+        logger.error("Erro when load content {}/{}".format(resource, content_id), exc_info=True)
         embedded_doc = None
     return embedded_doc
 
 
 def embedded_document(reference, data_relation, field_name, additional_embedded={}):
-    return get_content(data_relation['resource'], reference, additional_embedded)
+    if 'api' in data_relation:
+        return get_content(data_relation['api'], reference, additional_embedded)
+    return common.embedded_document(reference, data_relation, field_name)
 
 
 def resolve_additional_embedded_documents(document, resource, embedded_fields):
