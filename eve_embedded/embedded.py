@@ -32,7 +32,10 @@ import json
 import logging
 import requests
 
-default_headers = {"Accept": "text/json"}
+default_headers = {
+    "Accept": "text/json",
+    "'Cache-Control": "no-cache",
+}
 
 # hook
 before_build_document = []
