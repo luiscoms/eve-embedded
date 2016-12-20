@@ -1,8 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import setuptools
+from setuptools.command.test import test as TestCommand  # noqa N812
 
 from eve_embedded import __version__
+
+
+class Tox(TestCommand):
+    """Integration of tox via the setuptools ``test`` command"""
+    # pylint: disable=attribute-defined-outside-init
+    user_options = [('tox-args=', 'a', "Arguments to pass to tox")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.tox_args = None
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        from tox import cmdline  # pylint: disable=import-error
+        args = self.tox_args
+        if args:
+            args = split(self.tox_args)
+        cmdline(args=args)
 
 setuptools.setup(
     name="Eve-Embedded",
@@ -22,10 +45,15 @@ setuptools.setup(
     ],
     keywords=["eve", "rest", "api"],
     packages=setuptools.find_packages(exclude=["tests", "tests.*"]),
-    install_requires=[],
-    entry_points={
-        "console_scripts": [
-            "boilerplate_script = boilerplate.script:main"
-        ]
-    }
+    # setup_requires=[
+    #     "requests",
+    # ],
+    # install_requires=[
+    #     "eve",
+    # ],
+    # tests_require=['tox'],
+    cmdclass={
+        'test': Tox,
+    },
+    zip_safe=False,
 )

@@ -17,7 +17,15 @@ endif
 
 .PHONY: clean
 clean:
-	rm -rf .cache dist/ docs/_build htmlcov *.egg-info
+	rm -rf .cache dist/ docs/_build htmlcov *.egg-info .tox/
+	find . -name \*.pyc -delete -print
+
+.PHONY: develop
+develop: $(PYTHON_ACTIVATE)
+	$(PIP) install setuptools pip --upgrade
+	$(PIP) freeze
+	echo "-------------------"
+	$(PYTHON) setup.py develop
 
 .PHONY: install
 install: $(PYTHON_ACTIVATE)
