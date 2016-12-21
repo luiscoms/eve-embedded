@@ -1,7 +1,7 @@
 Eve-Embedded
 ===========
 
-Next Release
+0.0.2
 -----
 
 * Removing quote from no-cache header
