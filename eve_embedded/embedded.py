@@ -34,7 +34,7 @@ import requests
 
 default_headers = {
     "Accept": "text/json",
-    "'Cache-Control": "no-cache",
+    "Cache-Control": "no-cache",
 }
 
 # hook
