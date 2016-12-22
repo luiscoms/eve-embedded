@@ -1,17 +1,44 @@
-import os
 import json
+import os
+import unittest
 
 import eve
-import eve_embedded.embedded
+from bson import ObjectId
 from flask_pymongo import MongoClient
+
+import eve_embedded.embedded
 from tests.test_settings import \
     MONGO_HOST, MONGO_PORT, \
     MONGO_USERNAME, MONGO_PASSWORD, MONGO_DBNAME
 
-import unittest
-
 
 class TestBase(unittest.TestCase):
+
+    test_data = {
+        "skills": [
+            {
+                '_id': ObjectId('570c24f8de9f0c5e6c7a2e71'),
+                'name': "Programming"
+            },
+            {
+                '_id': ObjectId('570c24fbde9f0c5e6c7a2e9f'),
+                'name': "Reading"
+            },
+        ],
+        "people": [
+            {
+                '_id': ObjectId('54f112defba522406c9cc209'),
+                'name': "John",
+                "skills": [ObjectId('570c24f8de9f0c5e6c7a2e71'), ObjectId('570c24fbde9f0c5e6c7a2e9f')]
+            },
+            {
+                '_id': ObjectId('585a8be8f0983235bf0f95ed'),
+                'name': "Peter",
+                "rest_skills": ['570c24f8de9f0c5e6c7a2e71', '570c24fbde9f0c5e6c7a2e9f']
+            }
+        ]
+    }
+
     def setUp(self, settings=None):
         self.this_directory = os.path.dirname(os.path.realpath(__file__))
         if settings is None:
@@ -38,31 +65,12 @@ class TestBase(unittest.TestCase):
                                                    MONGO_PASSWORD)
 
         # seed
-        result = self.connection[MONGO_DBNAME].people.\
-            insert_one({
-                'name': "John"
-            })
-        result = self.connection[MONGO_DBNAME].people.\
-            insert_one({
-                'name': "Peter",
-                "relations": [
-                    {
-                        "relation_type": "family",
-                        "relation": result.inserted_id,
-                    }
-                ],
-                "rest_relations": [
-                    {
-                        "relation_type": "family",
-                        "relation": result.inserted_id,
-                    }
-                ]
-            })
-        # result = self.connection[MONGO_DBNAME].people.\
-        #     insert_one({'name': "Peter"})
-
-        # print(result.inserted_id)
-        # ObjectId('54f112defba522406c9cc208')
+        self.connection[MONGO_DBNAME] \
+            .skills \
+            .insert_many(self.test_data.get("skills"))
+        self.connection[MONGO_DBNAME] \
+            .people \
+            .insert_many(self.test_data.get("people"))
 
     def dropDB(self):
         self.connection = MongoClient(MONGO_HOST, MONGO_PORT)

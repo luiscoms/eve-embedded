@@ -23,8 +23,60 @@ Funcionamento:
 Monkey patch que altera o método build_response_document para incluir
 dados de outros serviços.
 
-"""
+import asyncio
 
+@asyncio.coroutine
+def asyncget(url):
+    import requests
+    print('async get')
+    print('async get')
+    # requests.get(url)
+    yield from asyncio.sleep(0)
+    return requests.get(url)
+
+item_url = 'http://localhost:8080/skills/570c24fbde9f0c5e6c7a2e9f'
+
+loop = asyncio.get_event_loop()
+tasks = [asyncio.ensure_future(factorial("A", 2))]
+tasks = [asyncio.ensure_future(asyncget(item_url))]
+loop.run_until_complete(asyncio.gather(*tasks))
+loop.close()
+for f in asyncio.as_completed(fs):
+    result = yield from f  # The 'yield from' may raise
+    # Use result
+
+@asyncio.coroutine
+def asyncget(url):
+    import requests
+    print('async get')
+    return requests.get(url)
+    for u in list(url):
+        yield from requests.get(url)
+    # yield from asyncio.sleep(0)
+
+
+import asyncio
+
+@asyncio.coroutine
+def _do_asyncget(*args, **kwargs):
+    print('async get')
+    print(args)
+    print(kwargs)
+    import requests
+    return requests.get(*args, **kwargs)
+
+def asyncget(*args, **kwargs):
+    # import requests
+    return asyncio.get_event_loop()\
+        .run_until_complete(_do_asyncget(*args, **kwargs))
+
+item_url = 'http://localhost:8080/skills/570c24fbde9f0c5e6c7a2e9f'
+items_url = 'http://localhost:8080/people?embedded={"rest_skills":1}'
+
+asyncget(item_url)
+
+"""
+from flask import current_app as app
 from eve.methods import common
 from eve.utils import parse_request, config, debug_error_message
 import importlib
@@ -35,6 +87,7 @@ import requests
 default_headers = {
     "Accept": "text/json",
     "Cache-Control": "no-cache",
+    # "purge-page": "1",
 }
 
 # hook
@@ -43,6 +96,27 @@ before_build_document = []
 extra_field_schemas = {}
 
 logger = logging.getLogger(__name__)
+
+import asyncio
+
+
+@asyncio.coroutine
+def _do_asyncget(*args, **kwargs):
+    print('async get')
+    print(args)
+    print(kwargs)
+    import requests
+    return requests.get(*args, **kwargs)
+
+
+def asyncget(*args, **kwargs):
+    # import requests
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # return asyncio.get_event_loop()\
+    return loop\
+        .run_until_complete(_do_asyncget(*args, **kwargs))
 
 
 def new_resolve_embedded_fields(resource, req, document):
@@ -145,7 +219,13 @@ def get_content(resource, content_id, additional_embedded={}):
     if additional_embedded:
         parms['embedded'] = json.dumps(dict((x, 1) for x in additional_embedded))
     try:
-        embedded_req = requests.get('{}/{}'.format(resource, content_id), headers=default_headers, params=parms)
+        url = '{}/{}'.format(resource, content_id)
+        print("Requesting: ", url)
+        assert content_id
+        app.logger.debug("Requesting: %s %s %s", url, default_headers, parms)
+        embedded_req = asyncget(url, headers=default_headers, params=parms, timeout=3)
+        print(10 *"em")
+        print(embedded_req.text)
         embedded_doc = embedded_req.json()
         if embedded_req.status_code != 200:
             raise Exception("Error getting doc: {} - {}".format(embedded_req.status_code, str(embedded_doc)))

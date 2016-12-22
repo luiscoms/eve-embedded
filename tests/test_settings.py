@@ -19,16 +19,26 @@ DOMAIN = {
                 'unique': True,
                 'description': 'the last name of the person'
             },
-            # 'authors': {
-            #     'type': 'list',
-            #     'schema': {
-            #         "type": "string",
-            #         "data_relation": {
-            #             "api": "http://api.rbs.com.br/authors",
-            #             "embeddable": True
-            #         }
-            #     }
-            # },
+            'skills': {
+                'type': 'list',
+                'schema': {
+                    "type": "objectid",
+                    "data_relation": {
+                        "resource": "skills",
+                        "embeddable": True
+                    }
+                }
+            },
+            'rest_skills': {
+                'type': 'list',
+                'schema': {
+                    "type": "string",
+                    "data_relation": {
+                        "api": "http://localhost:8080/skills",
+                        "embeddable": True
+                    }
+                }
+            },
             # 'job': {
             #     'type': 'string',
             #     'schema': {
@@ -74,7 +84,8 @@ DOMAIN = {
                         'relation': {
                             'type': 'string',
                             'data_relation': {
-                                "api": 'http://myapi.com/people',
+                                "api": 'http://localhost:8080/people',
+                                # "api": 'http://myapi.com/people',
                                 "embeddable": True,
                             }
                         }
@@ -83,7 +94,7 @@ DOMAIN = {
             }
         }
     },
-    'jobs': {
+    'skills': {
         'type': 'dict',
         'schema': {
             'name': {
