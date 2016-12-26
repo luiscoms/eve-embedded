@@ -108,8 +108,7 @@ def new_field_definition(resource, chained_fields, document):
     for field in subfields:
         try:
             definition = definition['schema'][field]
-            if definition.get('type') in ('list', 'string')\
-               and 'schema' in definition:
+            if definition.get('type') in ('list', 'string'):
                 definition = definition['schema']
             elif definition['type'] == 'vars_meta':
                 try:
@@ -127,6 +126,8 @@ def new_field_definition(resource, chained_fields, document):
 
 
 def get_content(resource, content_id, additional_embedded={}):
+    if not resource.startswith('http'):
+        raise Exception('COULD NOT EMBED CONTENT BECAUSE RESOURCE DOES NOT START WITH HTTP. PLEASE CHECK DATA RELATION ON CLIENT')
     parms = {}
     if additional_embedded:
         parms['embedded'] = json.dumps(dict((x, 1) for x in additional_embedded))
@@ -138,15 +139,13 @@ def get_content(resource, content_id, additional_embedded={}):
         if embedded_doc.get('_links'):
             del embedded_doc['_links']
     except:
-        logger.error("Erro when load content {}/{}".format(resource, content_id), exc_info=True)
+        logger.error("Error when load content: {}/{}".format(resource, content_id), exc_info=True)
         embedded_doc = None
     return embedded_doc
 
 
 def embedded_document(reference, data_relation, field_name, additional_embedded={}):
-    if 'api' in data_relation:
-        return get_content(data_relation['api'], reference, additional_embedded)
-    return common.embedded_document(reference, data_relation, field_name)
+    return get_content(data_relation['api'], reference, additional_embedded)
 
 
 def resolve_additional_embedded_documents(document, resource, embedded_fields):

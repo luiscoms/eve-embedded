@@ -1,6 +1,11 @@
 Eve-Embedded
 ===========
 
+Next Release
+-----
+
+* Fixing embedded on areas automaticas
+
 0.0.2
 -----
 
