@@ -1,6 +1,11 @@
 Eve-Embedded
 ===========
 
+0.0.3
+-----
+
+* Fixing embedded on areas automaticas
+
 0.0.2
 -----
 
