@@ -105,6 +105,8 @@ Running tests with `tox`
 
 You will need an instance of `mongo` running locally
 
+    docker run -d -p 27017:27017 mongo:3
+
 Install `tox`
 ```
 $ pip install tox
