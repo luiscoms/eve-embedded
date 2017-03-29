@@ -40,6 +40,8 @@ default_headers = {
 # hook
 before_build_document = []
 
+extra_field_schemas = {}
+
 logger = logging.getLogger(__name__)
 
 
@@ -81,8 +83,12 @@ def new_field_definition2(resource, chained_fields):
 
     definition = config.DOMAIN[resource]
     subfields = chained_fields.split('.')
+    _keys = extra_field_schemas.keys()
 
     for field in subfields:
+        field_type = definition.get('type')
+        if field_type in _keys:
+            definition = extra_field_schemas[field_type]
         if field not in definition.get('schema', {}):
             if 'data_relation' in definition and 'resource' in definition['data_relation']:
                 sub_resource = definition['data_relation']['resource']
@@ -94,7 +100,9 @@ def new_field_definition2(resource, chained_fields):
             return {}
         definition = definition['schema'][field]
         field_type = definition.get('type')
-        if field_type == 'list':
+        if field_type in _keys:
+            definition = extra_field_schemas[field_type]
+        elif field_type == 'list':
             definition = definition['schema']
         elif field_type == 'objectid':
             pass
@@ -105,8 +113,13 @@ def new_field_definition(resource, chained_fields, document):
     definition = config.DOMAIN[resource]
     subfields = chained_fields.split('.')
 
+    _keys = extra_field_schemas.keys()
     for field in subfields:
         try:
+            field_type = definition.get('type')
+            if field_type in _keys:
+                definition = extra_field_schemas[field_type]
+
             definition = definition['schema'][field]
             if definition.get('type') in ('list', 'string'):
                 definition = definition['schema']
@@ -145,7 +158,9 @@ def get_content(resource, content_id, additional_embedded={}):
 
 
 def embedded_document(reference, data_relation, field_name, additional_embedded={}):
-    return get_content(data_relation['api'], reference, additional_embedded)
+    if type(reference) is str:
+        return get_content(data_relation['api'], reference, additional_embedded)
+    return reference
 
 
 def resolve_additional_embedded_documents(document, resource, embedded_fields):
@@ -179,7 +194,9 @@ def resolve_additional_embedded_documents(document, resource, embedded_fields):
                 subdocument[last_field] = embedded_value
 
 
-def install(app):
+def install(app, special_field_types=dict(type="special", schema={})):
+    global extra_field_schemas
+    extra_field_schemas = special_field_types
     original_build_response_document = common.build_response_document
 
     def new_build_response_document(document, resource, embedded_fields, latest_doc=None):

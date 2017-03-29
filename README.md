@@ -44,6 +44,62 @@ embedded.install(app)
 ```
 
 
+Special field types
+----
+
+When you are using specia field types, you can pass it as argumen like:
+
+```python
+
+skill_schema = {
+    "title": {
+        "type": "string",
+    },
+    "level": {
+        "type": "string",
+        "schema": {
+            "type": "string",
+            "data_relation": {
+                "api": "http://api.example.com/levels",
+                "embeddable": True
+            }
+        }
+    }
+}
+
+skill_type_schema = {
+    "type": "skill",
+    "schema": skill_schema
+}
+
+schema = {
+    "firstname": {
+        "type": "string",
+        "minlength": 1,
+        "maxlength": 10,
+    },
+    "country": {
+        "type": "string",
+        "schema": {
+            "type": "string",
+            "data_relation": {
+                "api": "http://api.example.com/country",
+                "embeddable": True
+            }
+        }
+    },
+    "skills": {
+        "type":  "list",
+        "schema": {
+            "type":  "skill",
+        }
+    }
+}
+
+app = Eve()
+embedded.install(app, dict(area=skill_type_schema))
+```
+
 Running tests with `tox`
 ----
 
