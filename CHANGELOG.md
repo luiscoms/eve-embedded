@@ -1,6 +1,11 @@
 Eve-Embedded
 ===========
 
+0.1.0
+-----
+
+* Add `special_field_types` argument when install
+
 0.0.3
 -----
 
