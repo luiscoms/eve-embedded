@@ -9,6 +9,36 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 ITEM_METHODS = ['GET', 'PATCH', 'PUT', 'DELETE']
 
 DOMAIN = {
+    'roles': {
+        'type': 'dict',
+        'schema': {
+            'title': {
+                'type': 'string',
+                'required': True,
+                'unique': True,
+            },
+            'people': {
+                'type': 'list',
+                'schema': {
+                    "type": "objectid",
+                    "data_relation": {
+                        "resource": "people",
+                        "embeddable": True
+                    }
+                }
+            },
+            'rest_people': {
+                'type': 'list',
+                'schema': {
+                    "type": "string",
+                    "data_relation": {
+                        "api": "http://localhost:8080/people",
+                        "embeddable": True
+                    }
+                }
+            },
+        },
+    },
     'people': {
         'description': 'the people resource',
         'type': 'dict',

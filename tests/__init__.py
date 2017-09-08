@@ -34,8 +34,19 @@ class TestBase(unittest.TestCase):
             {
                 '_id': ObjectId('585a8be8f0983235bf0f95ed'),
                 'name': "Peter",
-                "skills": [ObjectId('570c24f8de9f0c5e6c7a2e71'), ObjectId('570c24fbde9f0c5e6c7a2e9f')],
                 "rest_skills": ['570c24f8de9f0c5e6c7a2e71', '570c24fbde9f0c5e6c7a2e9f']
+            }
+        ],
+        "roles": [
+            {
+                '_id': ObjectId('59b21c8ace035320ac129551'),
+                'title': "QA",
+                "people": [ObjectId('54f112defba522406c9cc209'), ObjectId('585a8be8f0983235bf0f95ed')]
+            },
+            {
+                '_id': ObjectId('59b21c78ce035320ac129550'),
+                'title': "Programmer",
+                "rest_people": ['54f112defba522406c9cc209', '585a8be8f0983235bf0f95ed']
             }
         ]
     }
@@ -72,6 +83,9 @@ class TestBase(unittest.TestCase):
         self.connection[MONGO_DBNAME] \
             .people \
             .insert_many(self.test_data.get("people"))
+        self.connection[MONGO_DBNAME] \
+            .roles \
+            .insert_many(self.test_data.get("roles"))
 
     def dropDB(self):
         self.connection = MongoClient(MONGO_HOST, MONGO_PORT)
