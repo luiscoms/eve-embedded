@@ -158,6 +158,40 @@ def get_content(resource, content_id, additional_embedded={}):
     return embedded_doc
 
 
+def clean_embedded_item(item):
+    item.pop("_links", None)
+    return item
+
+
+def get_contents(resource, list_ids, additional_embedded={}):
+    parms = {}
+    if additional_embedded:
+        parms['embedded'] = json.dumps(dict((x, 1) for x in additional_embedded))
+    try:
+        parms["where"] = json.dumps({
+            "_id": {
+                "$in": list_ids
+            }
+        })
+        embedded_req = requests.get(resource, headers=default_headers, params=parms)
+        if not embedded_req.ok:
+            raise Exception("Error getting doc: {} - {}".format(embedded_req.status_code, str(list_ids)))
+
+        embedded_docs = list(map(clean_embedded_item, embedded_req.json()["_items"]))
+    except:
+        logger.error("Error when load content: {} {}".format(resource, str(list_ids)), exc_info=True)
+        embedded_docs = None
+    return embedded_docs
+
+
+def embedded_documents(reference, data_relation, field_name, additional_embedded={}):
+    list_ids = [x for x in reference if type(x) is str]
+    if not list_ids:
+        return reference
+
+    return get_contents(data_relation['api'], list_ids, additional_embedded)
+
+
 def embedded_document(reference, data_relation, field_name, additional_embedded={}):
     if type(reference) is str:
         return get_content(data_relation['api'], reference, additional_embedded)
@@ -181,13 +215,15 @@ def resolve_additional_embedded_documents(document, resource, embedded_fields):
         field_extra_embedded = list(field_extra_embedded)
         data_relation = new_field_definition(resource, field, document)['data_relation']
         getter = lambda ref: embedded_document(ref, data_relation, field, field_extra_embedded)
+        getter_list = lambda ref: embedded_documents(ref, data_relation, field, field_extra_embedded)
         fields_chain = field.split('.')
         last_field = fields_chain[-1]
         for subdocument in common.subdocuments(fields_chain[:-1], document=document, resource=resource):
             if last_field not in subdocument:
                 continue
             if isinstance(subdocument[last_field], list):
-                embedded_value = list(map(getter, subdocument[last_field]))
+                embedded_value = getter_list(subdocument[last_field])
+                # embedded_value = list(map(getter, subdocument[last_field]))
                 embedded_value = [x for x in embedded_value if x is not None]
                 subdocument[last_field] = embedded_value
             else:

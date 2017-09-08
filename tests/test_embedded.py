@@ -4,6 +4,7 @@ from pprint import pprint
 
 import httpretty
 
+from eve_embedded.embedded import clean_embedded_item
 from tests import TestBase  # noqa: E402
 
 
@@ -13,29 +14,27 @@ class TestEveEmbedded(TestBase):
     def test_embedded_rest_relation(self):
         httpretty.disable()
 
-        peter_skills = '/people/585a8be8f0983235bf0f95ed'
-        people = self.parse_response(self.test_client.get(peter_skills))
+        peter_uri = '/people/585a8be8f0983235bf0f95ed'
+        people = self.parse_response(self.test_client.get(peter_uri))
         expected = people.copy()
-        # swap skills
-        # expected["skills"], expected["rest_skills"] = expected["rest_skills"], expected["skills"]
+
         peter_rest_skills = '/people/585a8be8f0983235bf0f95ed?embedded={"rest_skills":1}'
 
         expected["rest_skills"] = []
+
+        skills_uri = '/skills?where={"_id":{"$in":["570c24f8de9f0c5e6c7a2e71","570c24fbde9f0c5e6c7a2e9f"]}}'
         httpretty.enable()
-        skill = self.parse_response(self.test_client.get('/skills/570c24f8de9f0c5e6c7a2e71'))
-        skill.pop("_links", None)
+        skills = self.parse_response(self.test_client.get(
+            skills_uri
+        ))
+
         httpretty.register_uri(httpretty.GET,
-                               'http://localhost:8080/skills/570c24f8de9f0c5e6c7a2e71',
+                               'http://localhost:8080' + skills_uri,
                                content_type="application/json",
-                               body=json.dumps(skill))
-        expected["rest_skills"].append(skill)
-        skill = self.parse_response(self.test_client.get('/skills/570c24fbde9f0c5e6c7a2e9f'))
-        skill.pop("_links", None)
-        httpretty.register_uri(httpretty.GET,
-                               'http://localhost:8080/skills/570c24fbde9f0c5e6c7a2e9f',
-                               content_type="application/json",
-                               body=json.dumps(skill))
-        expected["rest_skills"].append(skill)
+                               body=json.dumps(skills))
+
+        embedded_skills = [clean_embedded_item(skill) for skill in skills["_items"]]
+        expected["rest_skills"] = embedded_skills
 
         people = self.parse_response(self.test_client.get(peter_rest_skills))
         self.assertEqual(expected, people)
