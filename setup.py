@@ -1,31 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import setuptools
-from setuptools.command.test import test as TestCommand  # noqa N812
-
+from os.path import abspath, dirname, join
 from eve_embedded import __version__
 
 
-class Tox(TestCommand):
-    """Integration of tox via the setuptools ``test`` command"""
-    # pylint: disable=attribute-defined-outside-init
-    user_options = [('tox-args=', 'a', "Arguments to pass to tox")]
+def read_file(filename):
+    """Read the contents of a file located relative to setup.py"""
+    with open(join(abspath(dirname(__file__)), filename)) as the_file:
+        return the_file.read()
 
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.tox_args = None
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        from tox import cmdline  # pylint: disable=import-error
-        args = self.tox_args
-        if args:
-            args = split(self.tox_args)
-        cmdline(args=args)
 
 setuptools.setup(
     name="Eve-Embedded",
@@ -45,8 +29,10 @@ setuptools.setup(
     ],
     keywords=["eve", "rest", "api"],
     packages=setuptools.find_packages(exclude=["tests", "tests.*"]),
-    cmdclass={
-        'test': Tox,
-    },
+    install_requires=[
+        "eve",
+        "requests"
+    ],
+    tests_require=["httpretty"],
     zip_safe=False,
 )

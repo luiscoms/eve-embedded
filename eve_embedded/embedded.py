@@ -24,7 +24,7 @@ Monkey patch que altera o método build_response_document para incluir
 dados de outros serviços.
 
 """
-
+from flask import abort
 from eve.methods import common
 from eve.utils import parse_request, config, debug_error_message
 import importlib
@@ -140,7 +140,8 @@ def new_field_definition(resource, chained_fields, document):
 
 def get_content(resource, content_id, additional_embedded={}):
     if not resource.startswith('http'):
-        raise Exception('COULD NOT EMBED CONTENT BECAUSE RESOURCE DOES NOT START WITH HTTP. PLEASE CHECK DATA RELATION ON CLIENT')
+        raise Exception('COULD NOT EMBED CONTENT BECAUSE RESOURCE DOES NOT '
+                        'START WITH HTTP. PLEASE CHECK DATA RELATION ON CLIENT')
     parms = {}
     if additional_embedded:
         parms['embedded'] = json.dumps(dict((x, 1) for x in additional_embedded))
@@ -202,9 +203,11 @@ def install(app, special_field_types=dict(type="special", schema={})):
     def new_build_response_document(document, resource, embedded_fields, latest_doc=None):
         for method in before_build_document:
             method(document, resource, embedded_fields, latest_doc)
-        old_embedded_fields = filter(lambda x: new_field_definition(resource, x, None).get('data_relation').get('resource'), embedded_fields)
+        old_embedded_fields = filter(lambda x: new_field_definition(resource, x, None).
+                                     get('data_relation').get('resource'), embedded_fields)
         old_embedded_fields = list(old_embedded_fields)
-        new_embedded_fields = filter(lambda x: not new_field_definition(resource, x, None).get('data_relation').get('resource'), embedded_fields)
+        new_embedded_fields = filter(lambda x: not new_field_definition(resource, x, None).
+                                     get('data_relation').get('resource'), embedded_fields)
         new_embedded_fields = list(new_embedded_fields)
         result = original_build_response_document(document, resource, old_embedded_fields, latest_doc)
         resolve_additional_embedded_documents(document, resource, new_embedded_fields)

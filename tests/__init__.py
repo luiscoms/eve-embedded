@@ -34,6 +34,7 @@ class TestBase(unittest.TestCase):
             {
                 '_id': ObjectId('585a8be8f0983235bf0f95ed'),
                 'name': "Peter",
+                "skills": [ObjectId('570c24f8de9f0c5e6c7a2e71'), ObjectId('570c24fbde9f0c5e6c7a2e9f')],
                 "rest_skills": ['570c24f8de9f0c5e6c7a2e71', '570c24fbde9f0c5e6c7a2e9f']
             }
         ]
@@ -47,7 +48,7 @@ class TestBase(unittest.TestCase):
         self.setupDB()
 
         self.settings = settings
-        self.app = eve.Eve(settings=self.settings)
+        self.app = eve.Eve(import_name="app", settings=self.settings)
         eve_embedded.embedded.install(self.app)
 
         self.test_client = self.app.test_client()
