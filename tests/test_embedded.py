@@ -10,6 +10,7 @@ from tests import TestBase  # noqa: E402
 
 class TestEveEmbedded(TestBase):
 
+    @unittest.skip
     @httpretty.activate
     def test_embedded_rest_relation(self):
         httpretty.disable()
@@ -36,12 +37,12 @@ class TestEveEmbedded(TestBase):
         people = self.parse_response(self.test_client.get(peter_rest_skills))
         self.assertEqual(expected, people)
 
-    @unittest.skip
-    @httpretty.activate
+    # @unittest.skip
+    # @httpretty.activate
     def test_embedded_rest_relation_nested(self):
-        httpretty.disable()
+        # httpretty.disable()
 
-        programmer_uri = '/roles/59b21c8ace035320ac129551'
+        programmer_uri = '/roles/59b21c78ce035320ac129550'
         roles = self.parse_response(self.test_client.get(programmer_uri))
         expected = roles.copy()
 
@@ -52,25 +53,29 @@ class TestEveEmbedded(TestBase):
         embedded_skills = [clean_embedded_item(skill) for skill in skills["_items"]]
         # expected["rest_skills"] = embedded_skills
 
-        peter_uri = '/people?where={"_id":{"$in":["585a8be8f0983235bf0f95ed"]}}'
-        people = self.parse_response(self.test_client.get(peter_uri))
+        # peter_uri = '/people?where={"_id":{"$in":["585a8be8f0983235bf0f95ed","54f112defba522406c9cc209"]}}'
+        peter_uri = '/people/585a8be8f0983235bf0f95ed'
+        peter = self.parse_response(self.test_client.get(peter_uri))
+        peter = clean_embedded_item(peter)
+        peter["rest_skills"] = embedded_skills
+        expected["rest_people"] = [peter]
 
-        cleaned_embedded_people = clean_embedded_item(people["_items"][0])
-        cleaned_embedded_people["rest_skills"] = embedded_skills
-        expected["rest_people"] = [cleaned_embedded_people]
+        john_uri = '/people/54f112defba522406c9cc209'
+        john = self.parse_response(self.test_client.get(john_uri))
+        expected["rest_people"].append(clean_embedded_item(john))
 
-        httpretty.enable()
-        httpretty.register_uri(httpretty.GET,
-                               'http://localhost:8080' + skills_uri,
-                               content_type="application/json",
-                               body=json.dumps(skills))
+        # httpretty.enable()
+        # httpretty.register_uri(httpretty.GET,
+        #                        'http://localhost:8080' + skills_uri,
+        #                        content_type="application/json",
+        #                        body=json.dumps(skills))
+        #
+        # httpretty.register_uri(httpretty.GET,
+        #                        'http://localhost:8080' + peter_uri,
+        #                        content_type="application/json",
+        #                        body=json.dumps(people))
 
-        httpretty.register_uri(httpretty.GET,
-                               'http://localhost:8080' + peter_uri,
-                               content_type="application/json",
-                               body=json.dumps(people))
-
-        programmer_rest_uri = '/roles/59b21c8ace035320ac129551?embedded={"rest_people":1,"rest_people.rest_skills":1}'
+        programmer_rest_uri = '/roles/59b21c78ce035320ac129550?embedded={"rest_people":1,"rest_people.rest_skills":1}'
         roles = self.parse_response(self.test_client.get(programmer_rest_uri))
         self.assertEqual(expected, roles)
 

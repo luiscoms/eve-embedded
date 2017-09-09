@@ -45,9 +45,10 @@ lint: $(PYTHON_ACTIVATE) install-dev
 
 # make test PY_VENV_PATH=env
 .PHONY: test
-test: install-dev lint
+test:
 	echo "Start testing"
-	$(PYTHON_ACTIVATE) && nosetests -v --with-doctest
+	gunicorn --workers=4 -b :8080 tests.test_app:application
+	tox
 
 # make register PIPY_REPOSITORY=pypitest
 .PHONY: register

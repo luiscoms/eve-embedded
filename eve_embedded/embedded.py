@@ -173,7 +173,7 @@ def get_contents(resource, list_ids, additional_embedded={}):
                 "$in": list_ids
             }
         })
-        embedded_req = requests.get(resource, headers=default_headers, params=parms)
+        embedded_req = requests.get(resource, headers=default_headers, params=parms, timeout=5)
         if not embedded_req.ok:
             raise Exception("Error getting doc: {} - {}".format(embedded_req.status_code, str(list_ids)))
 
